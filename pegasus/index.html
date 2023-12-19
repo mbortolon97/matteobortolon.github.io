@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="PEGasuS estimate camera pose from a single image and a 3D Gaussian Splatting model, without any pose prior">
+  <meta name="keywords" content="PEGasuS, 3DGS, pose estimation">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PEGasuS</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.ico">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">PEGasuS: 6D Pose Estimation from a Single Image and a 3D Gaussian Splatting Model</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=aGhFCssAAAAJ" target="_blank">Matteo Bortolon</a><sup>1,2,3</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=cG-YBGcAAAAJ" target="_blank">Theodore Tsesmelis</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=z3R9FfMAAAAJ" target="_blank">Stuart James</a><sup>1,4</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=BQ7li6AAAAAJ" target="_blank">Fabio Poiesi</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=LUzvbGIAAAAJ" target="_blank">Alessio Del Bue</a><sup>1</sup>,
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block logo-img"><sup>1</sup><img src="./static/logos/pavis.png">,</span>
+            <span class="author-block logo-img"><sup>2</sup><img src="./static/logos/fbk.jpg">,</span>
+            <span class="author-block logo-img"><sup>3</sup><img src="./static/logos/unitn.png">,</span>
+            <span class="author-block logo-img"><sup>4</sup><img src="./static/logos/durham.png"></span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="#"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=aMsoYYoA2i8"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <!-- 
+              <span class="link-block">
+                <a class="external-link button is-normal is-rounded is-dark is-grey" disabled>
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+              -->
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container">
+    <div class="hero-body has-text-centered">
+      <figure class="is-inline-block is-max-tablet">
+        <img src="./static/images/teaser1_h_yellow_a.png">
+      </figure>
+      <h2 class="subtitle has-text-centered">
+        PEGasuS leverage the rays projected outwards from the camera optical center reaching the surfaces of the Quadrics (i.e. Ellipsoids) establishing a correspondence between image pixels and 3DGS Quadrics. These rays-pixels correspondences are used by our approach to estimate the camera pose from a target image.
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            3D Gaussian Splatting (3DGS) is a Novel View Synthesis (NVS) approach that can render accurate and fast photorealistic images from arbitrary viewpoints. In this work, we show how 3DGS models can be used to recover the camera pose of never seen target views.
+          </p>
+          <p>
+            We introduce a novel radiant Quadricell sampling technique to cast a set of rays equally distributed on the surface of each 3D Gaussian modelled as a Quadric. 
+            Then, we assign rays to the pixels of the target image to synthesize their color values.
+            We compute this assignment by using a learned attention map, which scores the best ray-pixel correspondences.
+            Once rays and pixels are matched, the camera pose can be recovered by solving a weighted Least Squares problem.
+          </p>
+          <p>
+            PEGasuS needs no initial pose guess, as opposed to existing pose estimation NVS methods that instead need it as prior (e.g., iNeRF).
+            Moreover, compared to the existing NVS baselines for pose estimation, PEGasuS can improve the angular accuracy by <strong>41%</strong> for synthetic and <strong>70%</strong> for real experiments.
+            Our method operates in real-time, reaching <strong>34 fps</strong> on consumer hardware.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Paper video. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/aMsoYYoA2i8?si=XNHG6uht8nGs_Q1T&rel=0&amp;showinfo=0"
+                  frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+    <!--/ Paper video. -->
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Method. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Method</h2>
+        <figure class="is-inline-block">
+          <img src="./static/images/diagram_drawing_ray.png">
+        </figure>
+        <div class="content has-text-justified">
+          <p>
+            PEGasuS estimates the camera pose, given a target image and a pre-computed 3DGS model quadrics.
+            We use the set of quadrics in the 3DGS model and their geometrical parametrization to fit a radiant Quadricell on a given quadric surface, which divides the quadric surface into cells of approximately equal area (<b>A</b>).
+            We then cast a set of rays, using the radiant quadricell. A subset of these rays would be expected to intersect the camera, as in the case of the Quadric generation in 3DGS.
+            We identify the subset by an attention map between the embeddings of the target image and the generated rays (<b>C</b>).
+            The goal of the attention map is to select the rays that best correlate with the image by scoring them using the embedding similarity.
+            The scores provide a subset of candidate rays which are likely to fall within the image plane and match the encoded image pixel properties (<b>B</b>).
+            Finally, we recover the pose by minimizing the sum of perpendicular distances from the unique solution point to all the lines, i.e., the point which is closest to all the lines, by using the weighted Least Squares algorithm (<b>D</b>).
+            The direction of the selected rays also allows us to compute the yaw and pitch of the camera (<i>x</i> and <i>y</i>-axis) while the roll is computed based on the ray-image pixel association (<i>z</i>-axis).
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Method. -->
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Results. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Results</h2>
+        <div class="columns is-mobile">
+          <div class="column is-one-third">
+            <figure class="image">
+              <figcaption>Target image</figcaption>
+              <img src="./static/images/qualitative_visualization/render/gt_Barn.png">
+            </figure>
+            <figure class="image">
+              <figcaption>Estimated NVS</figcaption>
+              <img src="./static/images/qualitative_visualization/render/pred_Barn.png">
+            </figure>
+          </div>
+          <div class="column main-result-column">
+            <figure class="image">
+              <img src="./static/images/qualitative_visualization/Barn.png">
+            </figure>
+          </div>
+        </div>
+        <div class="columns is-mobile">
+          <div class="column is-one-third">
+            <figure class="image">
+              <figcaption>Target image</figcaption>
+              <img src="./static/images/qualitative_visualization/render/gt_chair.png">
+            </figure>
+            <figure class="image">
+              <figcaption>Estimated NVS</figcaption>
+              <img src="./static/images/qualitative_visualization/render/pred_chair.png">
+            </figure>
+          </div>
+          <div class="column main-result-column vertical-result">
+            <figure class="image">
+              <img src="./static/images/qualitative_visualization/chair.png">
+            </figure>
+          </div>
+        </div>
+        <div class="columns is-mobile">
+          <div class="column is-one-third">
+            <figure class="image">
+              <figcaption>Target image</figcaption>
+              <img src="./static/images/qualitative_visualization/render/gt_bonsai.png">
+            </figure>
+            <figure class="image">
+              <figcaption>Estimated NVS</figcaption>
+              <img src="./static/images/qualitative_visualization/render/pred_bonsai.png">
+            </figure>
+          </div>
+          <div class="column main-result-column">
+            <figure class="image">
+              <img src="./static/images/qualitative_visualization/bonsai.png">
+            </figure>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <!--/ Results. -->
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{bortolon2023pegasus,
+  title = {PEGasuS estimate camera pose from a single image and a 3D Gaussian Splatting model, without any pose prior},
+  author = {Bortolon, Matteo and Tsesmelis, Theodore and James, Stuart and Poiesi, Fabio and {Del Bue}, Alessio},
+  journal = {arXiv:},
+  year = {2023}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-Share Alike 4.0 International License</a>.
+            The webpage template is from <a href="https://nerfies.github.io/">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
