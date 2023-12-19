@@ -7,19 +7,15 @@
   <meta name="keywords" content="PEGasuS, 3DGS, pose estimation">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PEGasuS</title>
-
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDKSS583VX"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-
+    function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    gtag('config', 'G-PYVRSFMDRL');
+    gtag('config', 'G-YDKSS583VX');
   </script>
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
@@ -120,7 +116,7 @@
         <img src="./static/images/teaser1_h_yellow_a.png">
       </figure>
       <h2 class="subtitle has-text-centered">
-        PEGasuS leverage the rays projected outwards from the camera optical center reaching the surfaces of the Quadrics (i.e. Ellipsoids) establishing a correspondence between image pixels and 3DGS Quadrics. These rays-pixels correspondences are used by our approach to estimate the camera pose from a target image.
+        PEGasuS leverages the rays projected outwards from the camera optical center, reaching the surfaces of the quadrics (i.e., ellipsoids) and establishing a correspondence between image pixels and 3DGS quadrics. These rays-pixels correspondences are used by our approach to estimate the camera pose from a target image.
       </h2>
     </div>
   </div>
@@ -182,9 +178,9 @@
             We use the set of quadrics in the 3DGS model and their geometrical parametrization to fit a radiant Quadricell on a given quadric surface, which divides the quadric surface into cells of approximately equal area (<b>A</b>).
             We then cast a set of rays, using the radiant quadricell. A subset of these rays would be expected to intersect the camera, as in the case of the Quadric generation in 3DGS.
             We identify the subset by an attention map between the embeddings of the target image and the generated rays (<b>C</b>).
-            The goal of the attention map is to select the rays that best correlate with the image by scoring them using the embedding similarity.
-            The scores provide a subset of candidate rays which are likely to fall within the image plane and match the encoded image pixel properties (<b>B</b>).
-            Finally, we recover the pose by minimizing the sum of perpendicular distances from the unique solution point to all the lines, i.e., the point which is closest to all the lines, by using the weighted Least Squares algorithm (<b>D</b>).
+            The attention map aims to select the rays that best correlate with the image by scoring them using the embedding similarity.
+            The scores provide a subset of candidate rays that are likely to fall within the image plane and match the encoded image pixel properties (<b>B</b>).
+            Finally, we recover the pose by minimizing the sum of perpendicular distances from the unique solution point to all the lines, i.e., the point that is closest to all the lines, by using the weighted Least Squares algorithm (<b>D</b>).
             The direction of the selected rays also allows us to compute the yaw and pitch of the camera (<i>x</i> and <i>y</i>-axis) while the roll is computed based on the ray-image pixel association (<i>z</i>-axis).
           </p>
         </div>
@@ -200,6 +196,55 @@
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
         <h2 class="title is-3">Results</h2>
+        <div class="content has-text-justified">
+          <p>
+            Qualitative results on three different datasets, each figure depicts the target images (left up) and their corresponding NVS (left down) based on the camera poses, as these were estimated from PEGasuS (on the right of each scene).
+            The NVS of each scene is rendered based on the given 3DGS model.
+            The 3DGS model for each scene is displayed as sub-sampled points deriving from the corresponding ellipsoid centroids.
+            The color of the camera indicates the tested configuration as seen below.
+          </p>
+        </div>
+        <h2 class="subtitle is-8"><b>Camera configurations</b></h2>
+        <div class="columns is-size-7 result-legend">
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/gt.png">
+              <figcaption>Ground Truth</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/ours.png">
+              <figcaption>PEGasuS</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/inerf_init.png">
+              <figcaption>iNeRF with pose prior</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/inerf_random.png">
+              <figcaption>iNeRF without pose prior</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/nemo_voge_init.png">
+              <figcaption>NeMo + VoGE with pose prior</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/nemo_voge_random.png">
+              <figcaption>NeMo + VoGE without pose prior</figcaption>
+            </figure>
+          </div>
+        </div>
+        <hr/>
+        <h2 class="subtitle is-4 mt-5">Tanks &amp; Temples</h2>
         <div class="columns is-mobile">
           <div class="column is-one-third">
             <figure class="image">
@@ -217,6 +262,8 @@
             </figure>
           </div>
         </div>
+        <hr/>
+        <h2 class="subtitle is-4 mt-5">NeRF Synthetic 360&deg;</h2>
         <div class="columns is-mobile">
           <div class="column is-one-third">
             <figure class="image">
@@ -234,6 +281,8 @@
             </figure>
           </div>
         </div>
+        <hr/>
+        <h2 class="subtitle is-4 mt-5">Mip-NeRF 360&deg;</h2>
         <div class="columns is-mobile">
           <div class="column is-one-third">
             <figure class="image">
