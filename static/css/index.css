@@ -1,0 +1,32 @@
+body {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+
+.color1 {
+  background-color: #0097b2;
+  color: whitesmoke;
+}
+
+.is-name .title {
+  color: whitesmoke;
+}
+.is-name .subtitle {
+  color: whitesmoke;
+}
+
+.color2 {
+  background-color: #004aad;
+  color: whitesmoke;
+}
+
+.is-pubblications .title {
+  color: whitesmoke;
+}
+.is-pubblications .subtitle {
+  color: whitesmoke;
+}
+
+.text_img {
+  height: 1.5em;
+}
