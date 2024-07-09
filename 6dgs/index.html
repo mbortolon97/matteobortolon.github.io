@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="6DGS estimate camera pose from a single image and a 3D Gaussian Splatting model, without any pose prior">
+  <meta name="keywords" content="6DGS, 3DGS, pose estimation">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>6DGS</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3PFZBJX7MJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-3PFZBJX7MJ');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans"
+        rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <!-- <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css"> -->
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.ico">
+
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <!-- <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script> -->
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">6DGS: 6D Pose Estimation from a Single Image and a 3D Gaussian Splatting Model</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://mbortolon97.github.io/" target="_blank">Matteo Bortolon</a><sup>1,2,3</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=cG-YBGcAAAAJ" target="_blank">Theodore Tsesmelis</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://stuart-james.com/" target="_blank">Stuart James</a><sup>1,4</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://fabiopoiesi.github.io/" target="_blank">Fabio Poiesi</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www.iit.it/it/people-details/-/people/alessio-delbue" target="_blank">Alessio Del Bue</a><sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block logo-img"><sup>1</sup><img src="./static/logos/pavis.png">,</span>
+            <span class="author-block logo-img"><sup>2</sup><img src="./static/logos/fbk.png">,</span>
+            <span class="author-block logo-img"><sup>3</sup><img src="./static/logos/unitn.png">,</span>
+            <span class="author-block logo-img"><sup>4</sup><img src="./static/logos/durham.png"></span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="#"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=SB4ToD93NFA"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+
+              <span class="link-block">
+                <a class="external-link button is-normal is-rounded is-dark is-grey" disabled>
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container">
+    <div class="hero-body has-text-centered">
+      <figure class="is-inline-block is-max-tablet">
+        <img src="./static/images/diagram_drawing_teaser_compressed.png">
+      </figure>
+      <h2 class="subtitle has-text-centered">
+        Our 6DGS method departs from conventional analysis-by-synthesis methodologies. 
+        Standard NeRF-based methods <b>(left)</b> employ an iterative process, rendering candidate poses and comparing them with the target image before updating the pose.
+        In contrast, 6DGS <b>(right)</b> estimates the camera pose by selecting a bundle of rays projected from the ellipsoid surface (a <i>radiant Ellicell</i>) and learning an attention map to output ray/image pixel correspondences (based on DINOv2). The optimal bundle of rays should intersect the optical center of the camera and then are used to estimate the camera rotation in closed-form.
+        Our 6GDS method offers significantly improved accuracy and speed, enabling the recovery of the pose within a one-shot estimate.
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            We propose 6DGS to estimate the camera pose of a target RGB image given a 3D Gaussian Splatting (3DGS) model representing the scene.
+            Our method estimates a 6DoF pose by inverting the 3DGS rendering process.
+          </p>
+          <p>
+            Starting from the object surface, we define a radiant Ellicell that uniformly generates rays departing from each ellipsoid that parameterize the 3DGS model. Each Ellicell ray is associated with the rendering parameters of each ellipsoid, which in turn is used to obtain the best bindings between the target image pixels and the cast rays.
+            These pixel-ray bindings are then ranked to select the best scoring bundle of rays, which their intersection provides the camera center and, in turn, the camera rotation. The proposed solution obviates the necessity of an a priori pose for initialization, and it solves 6DoF pose estimation in closed form, without the need for iterations.
+          </p>
+          <p>
+            Moreover, compared to the existing Novel View Synthesis (NVS) baselines for pose estimation, 6DGS can improve the overall average rotational accuracy by <b>12%</b> and translation accuracy by <b>22%</b> on real scenes, despite not requiring any initialization pose. At the same time, our method operates near real-time, reaching <b>15fps</b> on consumer hardware.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Paper video. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/SB4ToD93NFA?si=reS9VsEo4OpZgX38&rel=0&amp;showinfo=0"
+                  frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+    <!--/ Paper video. -->
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Method. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Method</h2>
+        <figure class="is-inline-block">
+          <img src="./static/images/diagram_drawing_ray.png">
+        </figure>
+        <div class="content has-text-justified">
+          <p>
+            6DGS estimates the camera pose, given a target image and a pre-computed 3DGS model.
+            The image is encoded using a visual backbone <b>(a)</b>.
+            Concurrently, rays are uniformly projected from the center of the 3DGS ellipsoids <b>(b)</b>, and their corresponding color is estimated.  
+            Subsequently, an attention map mechanism is employed to compare the encoded ray and image features <b>(c)</b>. 
+            Following this comparison, the <i>N<sub>top</sub></i> matches are selected via attenuation, and the camera location is estimated <b>(d)</b> as the solution of a weighted Least Squares problem, resulting in a distinct 6DoF pose for the image.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Method. -->
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Results. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Results</h2>
+        <div class="content has-text-justified">
+          <p>
+            Qualitative results on Tanks &amp; Temple and Mip-NeRF 360&deg; datasets, each figure depicts the target images (left up) and their corresponding NVS (left down) based on the camera poses, as these were estimated from 6DGS (on the right of each scene).
+            The NVS of each scene is rendered based on the given 3DGS model.
+            The 3DGS model for each scene is displayed as sub-sampled points deriving from the corresponding ellipsoid centroids.
+            The color of the camera indicates the tested configuration as seen below.
+          </p>
+        </div>
+        <h2 class="subtitle is-8"><b>Camera configurations</b></h2>
+        <div class="columns is-size-7 result-legend pb-3">
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/gt.png">
+              <figcaption>Ground Truth</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/ours.png">
+              <figcaption>6DGS</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/inerf_init.png">
+              <figcaption>iNeRF w/ pose prior</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/inerf_random.png">
+              <figcaption>iNeRF w/o pose prior</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/pinerf_wprior.png">
+              <figcaption>Parallel NeRF w/ pose prior</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/pinerf_woprior.png">
+              <figcaption>Parallel NeRF w/o pose prior</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/nemo_voge_init.png">
+              <figcaption>NeMo + VoGE w/ pose prior</figcaption>
+            </figure>
+          </div>
+          <div class="column">
+            <figure class="">
+              <img src="./static/images/qualitative_visualization/cameras/nemo_voge_random.png">
+              <figcaption>NeMo + VoGE w/o pose prior</figcaption>
+            </figure>
+          </div>
+        </div>
+        <hr class="mt-6"/>
+        <h2 class="subtitle is-4 mt-5"><b>Truck</b></h2>
+        <h2 class="subtitle is-6"><i>Tanks &amp; Temples</i></h2>
+        <div class="columns is-mobile">
+          <div class="column is-one-third">
+            <figure class="image">
+              <figcaption>Target image</figcaption>
+              <img src="./static/images/qualitative_visualization/render/gt_truck.png">
+            </figure>
+            <figure class="image">
+              <figcaption>Estimated NVS</figcaption>
+              <img src="./static/images/qualitative_visualization/render/pred_truck.png">
+            </figure>
+          </div>
+          <div class="column main-result-column">
+            <figure class="image">
+              <img src="./static/images/qualitative_visualization/truck.png">
+            </figure>
+          </div>
+        </div>
+        <hr/>
+        <h2 class="subtitle is-4 mt-5"><b>Counter</b></h2>
+        <h2 class="subtitle is-6"><i>Mip-NeRF 360&deg;</i></h2>
+        <div class="columns is-mobile">
+          <div class="column is-one-third">
+            <figure class="image">
+              <figcaption>Target image</figcaption>
+              <img src="./static/images/qualitative_visualization/render/gt_counter.png">
+            </figure>
+            <figure class="image">
+              <figcaption>Estimated NVS</figcaption>
+              <img src="./static/images/qualitative_visualization/render/pred_counter.png">
+            </figure>
+          </div>
+          <div class="column main-result-column">
+            <figure class="image">
+              <img src="./static/images/qualitative_visualization/counter.png">
+            </figure>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <!--/ Results. -->
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{bortolon20246dgs,
+  title = {6DGS: 6D Pose Estimation from a Single Image and a 3D Gaussian Splatting Model},
+  author = {Bortolon, Matteo and Tsesmelis, Theodore and James, Stuart and Poiesi, Fabio and {Del Bue}, Alessio},
+  booktitle = {ECCV},
+  year = {2024}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-Share Alike 4.0 International License</a>.
+            The webpage template is from <a href="https://nerfies.github.io/">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
